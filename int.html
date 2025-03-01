@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>График функции</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.3.2/math.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            padding: 20px;
+            background: white;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+        }
+        input {
+            width: 60%;
+            padding: 8px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #007BFF;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .graphs {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        .graph-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            background: #fff;
+        }
+        canvas {
+            width: 90% !important;
+            height: 90vh !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Построение графика функции</h2>
+        <input type="text" id="functionInput" placeholder="Введите функцию, например: x^2">
+        <button onclick="plotFunction()">Решить</button>
+        <p id="derivativeOutput"></p>
+    </div>
+    <div class="graphs">
+        <div class="graph-container">
+            <h3>График функции</h3>
+            <canvas id="graphCanvas"></canvas>
+        </div>
+        <div class="graph-container">
+            <h3>График производной</h3>
+            <canvas id="derivativeCanvas"></canvas>
+        </div>
+    </div>
+    
+    <script>
+        function plotFunction() {
+            const inputFunction = document.getElementById("functionInput").value;
+            if (!inputFunction) {
+                alert("Введите функцию!");
+                return;
+            }
+
+            const parsedFunction = math.parse(inputFunction).toString();
+            const derivativeFunction = math.derivative(inputFunction, 'x').toString();
+            document.getElementById("derivativeOutput").innerText = "f'(x) = " + derivativeFunction;
+
+            const xValues = [];
+            const yValues = [];
+            const dyValues = [];
+            
+            for (let x = -10; x <= 10; x += 0.1) {
+                xValues.push(x);
+                try {
+                    yValues.push(math.evaluate(inputFunction, { x }));
+                    dyValues.push(math.evaluate(derivativeFunction, { x }));
+                } catch (error) {
+                    alert("Ошибка в выражении!");
+                    return;
+                }
+            }
+
+            drawGraph("graphCanvas", xValues, yValues, "График функции");
+            drawGraph("derivativeCanvas", xValues, dyValues, "График производной");
+        }
+
+        function drawGraph(canvasId, xValues, yValues, label) {
+            const ctx = document.getElementById(canvasId).getContext("2d");
+            if (window[canvasId + "Chart"]) {
+                window[canvasId + "Chart"].destroy();
+            }
+            window[canvasId + "Chart"] = new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels: xValues,
+                    datasets: [{
+                        label: label,
+                        borderColor: "blue",
+                        data: yValues,
+                        fill: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { title: { display: true, text: "x" } },
+                        y: { title: { display: true, text: "y" } }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
