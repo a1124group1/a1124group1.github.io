@@ -149,6 +149,8 @@
                         borderColor: "red",
                         data: yValues,
                         fill: false,
+                        pointRadius: 3,
+                        pointHoverRadius: 6
                     }]
                 },
                 options: {
@@ -157,6 +159,15 @@
                     scales: {
                         x: { title: { display: true, text: "x" } },
                         y: { title: { display: true, text: "y" } }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(tooltipItem) {
+                                    return `x: ${tooltipItem.label}, y: ${tooltipItem.raw.toFixed(4)}`;
+                                }
+                            }
+                        }
                     }
                 }
             });
