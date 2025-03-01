@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="manifest" href="manifest.json">
     <title>График функции</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.3.2/math.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Poppins', sans-serif;
             text-align: center;
-            background-color: #eef2f3;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: white;
             margin: 0;
             padding: 0;
             display: flex;
@@ -19,34 +21,44 @@
             height: 100vh;
         }
         .container {
-            width: 100%;
-            max-width: 900px;
+            width: 90%;
+            max-width: 800px;
             padding: 20px;
-            background: white;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(15px);
+            box-shadow: 0px 4px 30px rgba(0, 255, 255, 0.5);
+            border-radius: 15px;
             margin-top: 20px;
         }
         input {
             width: 70%;
-            padding: 10px;
+            padding: 12px;
             margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            background: rgba(0, 255, 255, 0.2);
+            color: white;
+            text-align: center;
+            outline: none;
+        }
+		input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
         }
         button {
-            padding: 12px 24px;
+            padding: 14px 28px;
             border: none;
-            background-color: #ff5733;
+            background: linear-gradient(90deg, #ff416c, #ff4b2b);
             color: white;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 18px;
-            transition: background 0.3s;
+            font-size: 20px;
+            transition: 0.3s;
         }
         button:hover {
-            background-color: #c70039;
+            background: linear-gradient(90deg, #ff4b2b, #ff416c);
+            box-shadow: 0 0 30px #ff416c;
+            transform: scale(1.05);
         }
         .graphs {
             display: flex;
@@ -59,29 +71,20 @@
         .graph-container {
             flex: 1 1 45%;
             max-width: 600px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
             padding: 15px;
-            background: #fff;
+            background: rgba(0, 0, 0, 0.5);
             border-radius: 10px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
             margin: 10px;
         }
         canvas {
             width: 100% !important;
             height: 400px !important;
         }
-        @media (max-width: 768px) {
-            .graphs {
-                flex-direction: column;
-                align-items: center;
-            }
-            .graph-container {
-                width: 90%;
-                max-width: none;
-            }
+		p#derivativeOutput {
+            color: #ffcc00;
+            font-size: 18px;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -112,7 +115,6 @@
                 return;
             }
 
-            const parsedFunction = math.parse(inputFunction).toString();
             const derivativeFunction = math.derivative(inputFunction, 'x').toString();
             document.getElementById("derivativeOutput").innerText = "f'(x) = " + derivativeFunction;
 
@@ -121,53 +123,54 @@
             const dyValues = [];
             
             for (let x = -10; x <= 10; x += 0.1) {
-                xValues.push(x);
+                xValues.push(parseFloat(x.toFixed(2)));
                 try {
-                    yValues.push(math.evaluate(inputFunction, { x }));
-                    dyValues.push(math.evaluate(derivativeFunction, { x }));
+                    yValues.push(parseFloat(math.evaluate(inputFunction, { x }).toFixed(4)));
+                    dyValues.push(parseFloat(math.evaluate(derivativeFunction, { x }).toFixed(4)));
                 } catch (error) {
                     alert("Ошибка в выражении!");
                     return;
                 }
             }
 
-            drawGraph("graphCanvas", xValues, yValues, "График функции");
-            drawGraph("derivativeCanvas", xValues, dyValues, "График производной");
+            drawGraph("graphCanvas", xValues, yValues, "График функции", "#00ffff");
+            drawGraph("derivativeCanvas", xValues, dyValues, "График производной", "#ffcc00");
         }
 
-        function drawGraph(canvasId, xValues, yValues, label) {
+        function drawGraph(canvasId, xValues, yValues, label, color) {
             const ctx = document.getElementById(canvasId).getContext("2d");
             if (window[canvasId + "Chart"]) {
                 window[canvasId + "Chart"].destroy();
             }
+            
+            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, color);
+            gradient.addColorStop(1, "rgba(0,0,0,0)");
+            
             window[canvasId + "Chart"] = new Chart(ctx, {
                 type: "line",
                 data: {
                     labels: xValues,
                     datasets: [{
                         label: label,
-                        borderColor: "red",
+                        borderColor: color,
+                        backgroundColor: gradient,
                         data: yValues,
-                        fill: false,
-                        pointRadius: 3,
-                        pointHoverRadius: 6
+                        fill: true,
+                        pointRadius: 2,
+                        pointHoverRadius: 6,
+                        borderWidth: 2,
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        x: { title: { display: true, text: "x" } },
-                        y: { title: { display: true, text: "y" } }
+                        x: { ticks: { color: "#ffffff" } },
+                        y: { ticks: { color: "#ffffff" } }
                     },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function(tooltipItem) {
-                                    return `x: ${tooltipItem.label}, y: ${tooltipItem.raw.toFixed(4)}`;
-                                }
-                            }
-                        }
+                    elements: {
+                        line: { tension: 0.3 }
                     }
                 }
             });
