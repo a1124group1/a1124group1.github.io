@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cache-v17'; 
+const CACHE_NAME = 'cache-v1'; 
 const urlsToCache = [
   '/',
   '/index.html',
