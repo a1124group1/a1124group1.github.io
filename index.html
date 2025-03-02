@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Дифференциатор А-11-24</title>
-    <script src="math.js"></script>
-    <script src="chart.js"></script>
+	<link rel="manifest" href="manifest.json">
+    <title>График функции</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.3.2/math.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             font-family: 'Poppins', sans-serif;
@@ -40,7 +41,7 @@
             text-align: center;
             outline: none;
         }
-	input::placeholder {
+		input::placeholder {
             color: rgba(255, 255, 255, 0.7);
         }
         button {
@@ -106,19 +107,6 @@
     </div>
     
     <script>
-	if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js')
-      .then((registration) => {
-        console.log('Service Worker успешно зарегистрирован с областью:', registration.scope);
-      })
-      .catch((error) => {
-        console.log('Ошибка регистрации Service Worker:', error);
-      });
-  });
-} else {
-  console.log('Service Worker не поддерживается этим браузером.');
-    }
         function plotFunction() {
             const inputFunction = document.getElementById("functionInput").value;
             if (!inputFunction) {
@@ -179,6 +167,17 @@
                     scales: {
                         x: { ticks: { color: "#ffffff" } },
                         y: { ticks: { color: "#ffffff" } }
+                    },
+					plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let x = context.label;
+                                    let y = context.raw;
+                                    return `x: ${x}, y: ${y}`;
+                                }
+                            }
+                        }
                     },
                     elements: {
                         line: { tension: 0.3 }
